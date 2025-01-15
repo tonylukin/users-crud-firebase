@@ -1,0 +1,4 @@
+nest-app/config/firebase.json
+.idea
+nest-app/node_modules
+nest-app/dist
