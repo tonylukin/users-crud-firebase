@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import Link from 'next/link';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -24,11 +25,34 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        {children}
-      </body>
+    <body
+      className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+    >
+    <div className="min-h-screen bg-gray-100 text-gray-800">
+      <div className="container mx-auto p-6">
+        <header className="mb-6">
+          <h1 className="text-2xl font-bold text-center">Users CRUD App (NestJS/Firebase, React/NextJS/TailwindCSS)</h1>
+        </header>
+        <main>
+          <nav className="bg-gray-800 text-white mb-4">
+            <ul className="flex space-x-4 p-4">
+              <li>
+                <Link
+                  className="px-3 py-2 rounded-md hover:bg-gray-700 hover:text-white focus:outline-none focus:ring focus:ring-gray-500"
+                  href="/">Homepage</Link>
+              </li>
+              <li>
+                <Link
+                  className="px-3 py-2 rounded-md hover:bg-gray-700 hover:text-white focus:outline-none focus:ring focus:ring-gray-500"
+                  href="/users">User list</Link>
+              </li>
+            </ul>
+          </nav>
+          {children}
+        </main>
+      </div>
+    </div>
+    </body>
     </html>
   );
 }

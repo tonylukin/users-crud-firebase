@@ -2,12 +2,20 @@
 import { useEffect, useState } from 'react';
 import axiosInstance from '@/utils/axiosInstance';
 import Link from 'next/link';
+import IUser from '@/interfaces/User';
+import UserList from '@/components/UserList';
+import Loader from '@/components/Loader';
+import Alert from '@/components/Alert';
 
-export default function UserList() {
-  const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(false);
+export default function UserListPage() {
+  const [users, setUsers] = useState<IUser[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string|null>(null);
 
   const fetchList = () => {
+
+    setLoading(true);
+
     axiosInstance.get('/users')
       .then((response) => {
           const users = [];
@@ -16,16 +24,19 @@ export default function UserList() {
           }
           setUsers(users);
       })
-      .catch((error) => console.error('Error fetching users:', error));
+      .catch((error) => setError('Error fetching users: ' + error))
+      .finally(() => setLoading(false))
+    ;
   }
 
   useEffect(() => {
     fetchList();
   }, []);
 
-  const handleDelete = async (id: Number) => {
+  const handleDelete = async (id: String|null) => {
     setLoading(true);
-    // setError(null);
+    setError(null);
+
     try {
       const response = await axiosInstance.delete(`/users/${id}`);
       if (response.status !== 200) {
@@ -33,30 +44,24 @@ export default function UserList() {
       }
       fetchList();
 
-    } catch (err) {
-      // setError(err.message);
+    } catch (err: any) {
+      setError(err);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div>
-      <h1>User List</h1>
+    <div className="bg-white shadow-md rounded-lg p-4">
+      {error && <Alert type="error" message={error} />}
+
+      <h2 className="text-xl font-semibold mb-4">User List</h2>
       <Link href="/users/create">
-        <button>Create User</button>
+        <button className="bg-amber-500 text-blue-900 px-4 py-2 rounded-md hover:bg-amber-600 focus:outline-none focus:ring focus:ring-amber-300">Create User</button>
       </Link>
-      <ul>
-        {users.map((user) => (
-          <li key={user.id}>
-            <strong>{user.name}</strong> - {user.zipCode}
-            <Link href={`/users/${user.id}`}>
-              <button>Edit</button>
-            </Link>
-            <button onClick={() => handleDelete(user.id)} disabled={loading}>Delete</button>
-          </li>
-        ))}
-      </ul>
+
+      {loading && <Loader />}
+      {!loading && <UserList users={users} onDelete={handleDelete} />}
     </div>
   );
 }

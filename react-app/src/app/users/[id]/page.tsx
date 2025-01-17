@@ -1,12 +1,12 @@
 "use client"
 import { useState, useEffect } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import axiosInstance from '@/utils/axiosInstance';
+import UserForm from '@/components/UserForm';
+import IUser, { IUserInput } from '@/interfaces/User';
 
-// todo add user interface
 export default function EditUser() {
-  const [user, setUser] = useState({ name: '', zipCode: '' });
-  const router = useRouter();
+  const [user, setUser] = useState<IUser|null>(null);
   const params = useParams();
   const id = params.id;
 
@@ -18,41 +18,25 @@ export default function EditUser() {
         })
         .catch((error) => console.error('Error fetching user:', error));
     }
-  }, [id]);
+  }, []);
 
-  const handleSubmit = (e: any) => {
-    e.preventDefault();
-    axiosInstance.put(`/users/${id}`, user)
-      .then(() => router.push('/users'))
-      .catch((error: object) => console.error('Error updating user:', error));
+  const handleSubmit = (data: IUserInput|null) => {
+    return new Promise<void>((resolve, reject) => {
+      axiosInstance.put(`/users/${id}`, data)
+        .then(() => {
+          resolve();
+        })
+        .catch((error) => {
+          console.error('Error updating user:', error);
+          reject();
+        });
+    });
   };
 
   return (
     <div>
-      <h1>Edit User</h1>
-      <form onSubmit={handleSubmit}>
-        <label>
-          Name:
-          <input
-            type="text"
-            value={user.name}
-            onChange={(e) => setUser({ ...user, name: e.target.value })}
-            required
-          />
-        </label>
-        <br />
-        <label>
-          Zip Code:
-          <input
-            type="text"
-            value={user.zipCode}
-            onChange={(e) => setUser({ ...user, zipCode: e.target.value })}
-            required
-          />
-        </label>
-        <br />
-        <button type="submit">Update</button>
-      </form>
+      <h2 className="text-xl font-semibold mb-4">Edit User #{user?.id}</h2>
+      <UserForm onSubmit={handleSubmit} initialUser={user} />
     </div>
   );
 }

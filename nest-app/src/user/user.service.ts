@@ -19,7 +19,13 @@ export class UserService {
 
   async createUser(createUserDto: UserDto) {
     const { name, zipCode } = createUserDto;
-    const locationData = await this.fetchLocationData(zipCode);
+
+    let locationData = {};
+    try {
+      locationData = await this.fetchLocationData(zipCode);
+    } catch (e) {
+      console.error(e);
+    }
 
     const newUser = {
       id: uuidv4(),
@@ -40,10 +46,14 @@ export class UserService {
       throw new Error('User not found');
     }
 
-    const locationData =
-      zipCode !== existingUser.zipCode
-        ? await this.fetchLocationData(zipCode)
-        : { latitude: existingUser.latitude, longitude: existingUser.longitude, timezone: existingUser.timezone };
+    let locationData = {};
+    try {
+      if (zipCode !== existingUser.zipCode) {
+        locationData = await this.fetchLocationData(zipCode);
+      }
+    } catch (e) {
+      console.error(e);
+    }
 
     const updatedUser = {
       ...existingUser,
